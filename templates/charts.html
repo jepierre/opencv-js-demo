@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"
+		integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+	<style type="text/css">
+		/* Start by setting display:none to make this hidden.
+   Then we position it in relation to the viewport window
+   with position:fixed. Width, height, top and left speak
+   for themselves. Background we set to 80% white with
+   our animation centered, and no-repeating */
+		.modal {
+			display: none;
+			position: fixed;
+			z-index: 1000;
+			top: 0;
+			left: 0;
+			height: 100%;
+			width: 100%;
+			background: rgba(255, 255, 255, .8) url('http://i.stack.imgur.com/FhHRx.gif') 50% 50% no-repeat;
+		}
+
+		/* When the body has the loading class, we turn
+   the scrollbar off with overflow:hidden */
+		body.loading {
+			overflow: hidden;
+		}
+
+		/* Anytime the body has the loading class, our
+   modal element will be visible */
+		body.loading .modal {
+			display: block;
+		}
+	</style>
+	<script async src="https://docs.opencv.org/4.x/opencv.js" type="text/javascript" charset="utf-8"></script>
+	<title>OpenCV Tutorials using JavaScript</title>
+</head>
+
+<body>
+	<div class="container">
+		<div class="jumbotron text-center">
+			<h1> OpenCV - Load an image</h1>
+			<p> This is an example for loading an image</p>
+			<p id="status">OpenCV.js is loading...</p>
+		</div>
+
+		<div class="row">
+			<div class="col-sm">
+				<div class="card">
+					<div class="card-header">
+						Original Image
+					</div>
+					<div class="card-block text-center">
+
+						<img id="imageSrc" src="{{ user_image }}" alt="No Image" class="img-thumbnail" />
+						<!-- <img id="imageSrc" alt="No Image" class="img-thumbnail" /> -->
+
+					</div>
+					<div class="card-footer text-muted">
+						<!-- <input type="file" id="fileInput" name="file" /> -->
+						<button id="histButton">Show Hist</button>
+					</div>
+				</div>
+
+			</div>
+			<div class="col-sm">
+				<div class="card">
+					<div class="card-header">
+						Updated Image
+					</div>
+					<div class="card-block">
+						<canvas id="imageCanvas"></canvas>
+					</div>
+				</div>
+
+			</div>
+			<div class="col-sm">
+				<div class="card">
+					<div class="card-header">
+						Histogram
+					</div>
+					<div class="card-block">
+						<canvas id="imgHist"></canvas>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+		document.body.classList.add("loading");
+
+		// function main() {
+		let imgElement = document.getElementById('imageSrc');
+		let inputElement = document.getElementById('fileInput');
+		const button = document.getElementById('histButton');
+
+
+		// inputElement.addEventListener('change', (e) => {
+		// 	imgElement.src = URL.createObjectURL(e.target.files[0]);
+		// }, false);
+
+		// imgElement.onload = async function () {
+		button.addEventListener("click", async function() {
+			await onOpenCvReady()
+
+			let mat = cv.imread(imgElement);
+
+			let gray_img = new cv.Mat();
+			cv.cvtColor(mat, gray_img, cv.COLOR_RGBA2GRAY, 0);
+
+			let srcVec = new cv.MatVector();
+			srcVec.push_back(gray_img);
+			let accumulate = false;
+			let channels = [0];
+			let histSize = [256];
+			let ranges = [0, 255];
+			let hist = new cv.Mat();
+			let mask = new cv.Mat();
+			let color = new cv.Scalar(255, 255, 255);
+			let scale = 2;
+			// You can try more different parameters
+			cv.calcHist(srcVec, channels, mask, hist, histSize, ranges, accumulate);
+			let result = cv.minMaxLoc(hist, mask);
+			let max = result.maxVal;
+			let dst = new cv.Mat.zeros(mat.rows, histSize[0] * scale,
+				cv.CV_8UC3);
+			// draw histogram
+			for (let i = 0; i < histSize[0]; i++) {
+				let binVal = hist.data32F[i] * mat.rows / max;
+				let point1 = new cv.Point(i * scale, mat.rows - 1);
+				let point2 = new cv.Point((i + 1) * scale - 1, mat.rows - binVal);
+				cv.rectangle(dst, point1, point2, color, cv.FILLED);
+			}
+
+			cv.imshow('imageCanvas', gray_img);
+			cv.imshow('imgHist', dst);
+			mat.delete();
+			dst.delete(); srcVec.delete(); mask.delete(); hist.delete();
+
+		});
+		// }
+
+
+		function onOpenCvReady() {
+			document.body.classList.remove("loading");
+			// main()
+		}
+
+		var Module = {
+			// https://emscripten.org/docs/api_reference/module.html#Module.onRuntimeInitialized
+			onRuntimeInitialized() {
+				document.getElementById('status').innerHTML = 'OpenCV.js is ready.';
+				// onOpenCvReady();
+			}
+		};
+	</script>
+
+</body>
+
+</html>
