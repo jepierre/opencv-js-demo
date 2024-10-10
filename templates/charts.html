@@ -45,72 +45,145 @@
 		<div class="jumbotron text-center">
 			<h1> OpenCV - Load an image</h1>
 			<p> This is an example for loading an image</p>
-			<p id="status">OpenCV.js is loading...</p>
 		</div>
 
-		<div class="row">
-			<div class="col-sm">
+		<div class="row text-center p-2">
+			<p id="status">OpenCV.js is loading...</p>
+			<input type="file" id="fileInput" name="file" class="form-control" />
+		</div>
+
+		<div class="row p-2">
+			<div class="col-sm-3">
 				<div class="card">
 					<div class="card-header">
 						Original Image
 					</div>
 					<div class="card-block text-center">
-
 						<img id="imageSrc" src="{{ user_image }}" alt="No Image" class="img-thumbnail" />
-						<!-- <img id="imageSrc" alt="No Image" class="img-thumbnail" /> -->
-
 					</div>
 					<div class="card-footer text-muted">
-						<!-- <input type="file" id="fileInput" name="file" /> -->
-						<button id="histButton">Show Hist</button>
+						<button id="loadImg">Load Image</button>
 					</div>
 				</div>
-
 			</div>
+
 			<div class="col-sm">
-				<div class="card">
-					<div class="card-header">
-						Updated Image
+				<div class="row p-1">
+					<div class="col-sm">
+						<div class="card">
+							<div class="card-header">
+								Grayscale Image
+							</div>
+							<div class="card-block text-center">
+								<canvas id="imgOut1"></canvas>
+							</div>
+						</div>
 					</div>
-					<div class="card-block text-center">
-						<canvas id="imageCanvas"></canvas>
+					<div class="col-sm">
+						<div class="card">
+							<div class="card-header">
+								Histogram
+							</div>
+							<div class="card-block">
+								<canvas id="imgHist1"></canvas>
+							</div>
+							<div class="card-footer">
+								<input type="range" id="contrast" value="1.0" min="0" max="5" step="0.1">
+								<p>Value: <span id="constrastValue">1.0</span></p>
+								<input type="range" id="brightness" value="50" min="0" max="100" step="1">
+								<p>Value: <span id="brightnessValue">50</span></p>
+							</div>
+						</div>
+
+					</div>
+					<div class="row p-1">
+						<div class="col-sm">
+							<div class="card">
+								<div class="card-header">
+									Grayscale Image
+								</div>
+								<div class="card-block text-center">
+									<canvas id="imgOut2"></canvas>
+								</div>
+							</div>
+						</div>
+						<div class="col-sm">
+							<div class="card">
+								<div class="card-header">
+									Histogram
+								</div>
+								<div class="card-block">
+									<canvas id="imgHist2"></canvas>
+								</div>
+								<div class="card-footer">
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row p-1">
+						<div class="col-sm">
+							<div class="card">
+								<div class="card-header">
+									Grayscale Image
+								</div>
+								<div class="card-block text-center">
+									<canvas id="imgOut3"></canvas>
+								</div>
+							</div>
+						</div>
+						<div class="col-sm">
+							<div class="card">
+								<div class="card-header">
+									Histogram
+								</div>
+								<div class="card-block">
+									<canvas id="imgHist3"></canvas>
+								</div>
+								<div class="card-footer">
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row p-1">
+						<div class="col-sm">
+							<div class="card">
+								<div class="card-header">
+									Grayscale Image
+								</div>
+								<div class="card-block text-center">
+									<canvas id="imgOut4"></canvas>
+								</div>
+							</div>
+						</div>
+						<div class="col-sm">
+							<div class="card">
+								<div class="card-header">
+									Histogram
+								</div>
+								<div class="card-block">
+									<canvas id="imgHist4"></canvas>
+								</div>
+								<div class="card-footer">
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
-
-			</div>
-			<div class="col-sm">
-				<div class="card">
-					<div class="card-header">
-						Histogram
-					</div>
-					<div class="card-block">
-						<canvas id="imgHist"></canvas>
-					</div>
-					<div class="card-footer">
-						<input type="range" id="contrast" value="1" min="0" max="5" step="0.1">
-						<p>Value: <span id="constrastValue">1</span></p>
-						<input type="range" id="brightness" value="1" min="0" max="100" step="1">
-						<p>Value: <span id="brightnessValue">1</span></p>
-					</div>
-				</div>
-
 			</div>
 		</div>
 	</div>
 	<script type="text/javascript">
 		document.body.classList.add("loading");
 
-		// function main() {
 		let imgElement = document.getElementById('imageSrc');
 		let inputElement = document.getElementById('fileInput');
-		const button = document.getElementById('histButton');
+		const button = document.getElementById('loadImg');
 		const contrast = document.getElementById('contrast');
 		const imgBrightness = document.getElementById('brightness');
 		const contrastValue = document.getElementById('constrastValue');
 		const brightnessValue = document.getElementById('brightnessValue');
 		let alpha = contrastValue.value;
 		let beta = brightnessValue.value;
-
 
 		contrast.addEventListener('input', (event) => {
 			contrastValue.textContent = event.target.value;
@@ -124,12 +197,10 @@
 			performImgProc();
 		});
 
-		// inputElement.addEventListener('change', (e) => {
-		// 	imgElement.src = URL.createObjectURL(e.target.files[0]);
-		// }, false);
+		inputElement.addEventListener('change', (e) => {
+			imgElement.src = URL.createObjectURL(e.target.files[0]);
+		}, false);
 
-		// imgElement.onload = async function () {
-		// button.addEventListener("click", async function () {
 		button.addEventListener("click", function () {
 			performImgProc();
 
@@ -141,18 +212,11 @@
 			let maxVal = 255;
 			let minLoc, maxLoc;
 
-			// // Find min and max pixel values
-			// cv.minMaxLoc(src, (min, max) => {
-			// 	minVal = min;
-			// 	maxVal = max;
-			// });
-
-			// [minVal, maxVal, minLoc, maxLoc] = cv.minMaxLoc(src);
+			// Find min and max pixel values
 			result = cv.minMaxLoc(src);
 
 			minVal = result.minVal;
 			maxVal = result.maxVal;
-
 
 			// Apply contrast stretching formula
 			cv.convertScaleAbs(src, dst, 255 / (maxVal - minVal), -minVal * 255 / (maxVal - minVal));
@@ -171,12 +235,14 @@
 			let mask = new cv.Mat();
 			let color = new cv.Scalar(255, 255, 255);
 			let scale = 2;
+
 			// You can try more different parameters
 			cv.calcHist(srcVec, channels, mask, hist, histSize, ranges, accumulate);
 			let result = cv.minMaxLoc(hist, mask);
 			let max = result.maxVal;
 			let dst = new cv.Mat.zeros(inImg.rows, histSize[0] * scale,
 				cv.CV_8UC3);
+
 			// draw histogram
 			for (let i = 0; i < histSize[0]; i++) {
 				let binVal = hist.data32F[i] * inImg.rows / max;
@@ -185,67 +251,78 @@
 				cv.rectangle(dst, point1, point2, color, cv.FILLED);
 			}
 
-			cv.imshow('imgHist', dst);
-			dst.delete(); srcVec.delete(); mask.delete(); hist.delete();
+			srcVec.delete(); mask.delete(); hist.delete();
+			return dst;
 		}
 
 		function performImgProc() {
-			// await onOpenCvReady()
 
 			let mat = cv.imread(imgElement);
 
 			let gray_img = new cv.Mat();
 			cv.cvtColor(mat, gray_img, cv.COLOR_RGBA2GRAY, 0);
 
-			// create low contrast image
-			let lowContrastImg = new cv.Mat();
-			cv.addWeighted(gray_img, 0.1, gray_img, 0, 0, lowContrastImg);
-
-			let newImg = new cv.Mat();
-			// newImg = contrastStretch(lowContrastImg);
-
-			cv.equalizeHist(lowContrastImg, newImg);
-			calcHist(newImg);
-
-
-
-			// Adjust brightness and contrast
-			// let alpha = 2.5; // Contrast control (1.0 for no change)
-			// let beta = 50; // Brightness control (0 for no change)
-
 			let dst2 = new cv.Mat();
+			//set alpha and bias to control contrast and brightness
 			cv.addWeighted(gray_img, parseFloat(alpha), gray_img, 0, parseFloat(beta), dst2);
 
-			// let srcVec = new cv.MatVector();
-			// srcVec.push_back(dst2);
-			// let accumulate = false;
-			// let channels = [0];
-			// let histSize = [256];
-			// let ranges = [0, 255];
-			// let hist = new cv.Mat();
-			// let mask = new cv.Mat();
-			// let color = new cv.Scalar(255, 255, 255);
-			// let scale = 2;
-			// // You can try more different parameters
-			// cv.calcHist(srcVec, channels, mask, hist, histSize, ranges, accumulate);
-			// let result = cv.minMaxLoc(hist, mask);
-			// let max = result.maxVal;
-			// let dst = new cv.Mat.zeros(mat.rows, histSize[0] * scale,
-			// 	cv.CV_8UC3);
-			// // draw histogram
-			// for (let i = 0; i < histSize[0]; i++) {
-			// 	let binVal = hist.data32F[i] * mat.rows / max;
-			// 	let point1 = new cv.Point(i * scale, mat.rows - 1);
-			// 	let point2 = new cv.Point((i + 1) * scale - 1, mat.rows - binVal);
-			// 	cv.rectangle(dst, point1, point2, color, cv.FILLED);
-			// }
+			// create low contrast image
+			// cv.addWeighted(gray_img, 0.1, gray_img, 0, 0, dst2);
+			let dstHist1 = calcHist(dst2);
 
-			cv.imshow('imageCanvas', newImg);
-			// cv.imshow('imgHist', dst);
+			// apply contrast stretch
+			let imgContrastStretch = new cv.Mat();
+			imgContrastStretch = contrastStretch(dst2);
+
+			let imgContrastStretchHist = calcHist(imgContrastStretch);
+
+			let imgEqualHist = new cv.Mat();
+			cv.equalizeHist(dst2, imgEqualHist);
+
+			let imgEqualHistHist = calcHist(imgEqualHist);
+
+			// let overlay the image with gaussian blur
+			let imgBloom = dst2.clone();
+			let bloomImg = new cv.Mat(dst2.size().width, dst2.size().height, cv.CV_8UC1);
+
+			// draw a circle
+			let center = new cv.Point(0, 1);			
+			let radius = 50;
+			let color = new cv.Scalar(255, 0, 0, 255); // color (B, G, R, A)
+			let thickness = -1; //line thickness, -1 is filled circle
+
+			cv.circle(bloomImg, center, radius, color, thickness)
+
+			let ksize = new cv.Size(5, 5); // kernel size (must be odd)
+			cv.GaussianBlur(bloomImg, bloomImg, ksize, 0, 0, cv.BORDER_DEFAULT);
+
+			let imgBloomHist = calcHist(imgBloom);
+
+
+			cv.imshow('imgOut1', dst2);
+			cv.imshow('imgHist1', dstHist1);
+
+			cv.imshow('imgOut4', imgContrastStretch);
+			cv.imshow('imgHist4', imgContrastStretchHist);
+
+			cv.imshow('imgOut3', imgEqualHist);
+			cv.imshow('imgHist3', imgEqualHistHist);
+
+			cv.imshow('imgOut2', bloomImg);
+			cv.imshow('imgHist2', imgBloomHist);
+
 			mat.delete();
+			gray_img.delete();
 			dst2.delete();
-			newImg.delete();
-			// dst.delete(); srcVec.delete(); mask.delete(); hist.delete();
+			dstHist1.delete();
+			imgContrastStretch.delete();
+			imgContrastStretchHist.delete();
+			imgEqualHist.delete();
+			imgEqualHistHist.delete();
+			imgBloom.delete();
+			imgBloomHist.delete();
+			bloomImg.delete();
+
 
 		};
 		// }
