@@ -80,8 +80,8 @@
 							<div class="card-footer">
 								<input type="range" id="contrast" value="1.0" min="0" max="5" step="0.1" />
 								<p>Contrast: <span id="contrastValue">1.0</span></p>
-								<input type="range" id="brightness" value="50" min="0" max="100" step="1" />
-								<p>Brightness: <span id="brightnessValue">50</span></p>
+								<input type="range" id="brightness" value="0" min="0" max="100" step="1" />
+								<p>Brightness: <span id="brightnessValue">0</span></p>
 							</div>
 						</div>
 					</div>
@@ -202,9 +202,9 @@
 		const contrastValue = document.getElementById('contrastValue');
 		const brightnessValue = document.getElementById('brightnessValue');
 
-		let alpha = parseFloat(contrastValue.innerText);
-		let beta = parseFloat(brightnessValue.innerText);
-		let ksizeVal = parseFloat(kernelSizeValue.innerText);
+		let alpha = parseFloat(contrast.value);
+		let beta = parseFloat(imgBrightness.value);
+		let ksizeVal = parseFloat(kernelSize.value);
 
 		contrast.addEventListener('input', (event) => {
 			contrastValue.textContent = event.target.value;
@@ -219,13 +219,13 @@
 		});
 
 		kernelSize.addEventListener('input', (event) => {
-			kernelSizeValue.textContent = event.target.value;
 			ksizeVal = parseInt(event.target.value)
 
 			if (ksizeVal === 0 || !(ksizeVal % 2)) { // === equal value and equal type https://www.w3schools.com/js/js_operators.asp
 				ksizeVal += 1
 			}
 
+			kernelSizeValue.textContent = ksizeVal;
 			performImgProc();
 		});
 
@@ -291,11 +291,15 @@
 		function performImgProc() {
 
 			let mat = cv.imread(imgElement);
-
 			let gray_img = new cv.Mat();
+			let dst2 = new cv.Mat();
+			let imgContrastStretch = new cv.Mat();
+			let imgEqualHist = new cv.Mat();
+			let imgBloom = new cv.Mat();
+			let blurImg = new cv.Mat();
+
 			cv.cvtColor(mat, gray_img, cv.COLOR_RGBA2GRAY, 0);
 
-			let dst2 = new cv.Mat();
 			//set alpha and bias to control contrast and brightness
 			cv.addWeighted(gray_img, parseFloat(alpha), gray_img, 0, parseFloat(beta), dst2);
 
@@ -304,36 +308,33 @@
 			let dstHist1 = calcHist(dst2);
 
 			// apply contrast stretch
-			let imgContrastStretch = new cv.Mat();
 			imgContrastStretch = contrastStretch(dst2);
 
 			let imgContrastStretchHist = calcHist(imgContrastStretch);
 
-			let imgEqualHist = new cv.Mat();
 			cv.equalizeHist(dst2, imgEqualHist);
 
 			let imgEqualHistHist = calcHist(imgEqualHist);
 
 			// let overlay the image with gaussian blur
-			let imgBloom = new cv.Mat();
 			let bloomImg = new cv.Mat(dst2.size().width, dst2.size().height, cv.CV_8UC1);
 
 			// draw a circle
-			let center = new cv.Point(0, 1);
+			let center = new cv.Point(0, 0);
 			let radius = 50;
 			let color = new cv.Scalar(255, 0, 0, 255); // color (B, G, R, A)
 			let thickness = -1; //line thickness, -1 is filled circle
 
-			cv.circle(bloomImg, center, radius, color, thickness)
+			cv.circle(bloomImg, center, radius, color, cv.FILLED)
 
 			let ksize = new cv.Size(ksizeVal, ksizeVal); // kernel size (must be odd)
-			cv.GaussianBlur(bloomImg, bloomImg, ksize, 0, 0, cv.BORDER_DEFAULT);
+			cv.GaussianBlur(bloomImg, blurImg, ksize, 0, 0, cv.BORDER_REPLICATE);
 
 			// combine the images
-			cv.addWeighted(dst2, 0.5, bloomImg, 0.5, 0.0, imgBloom);
+			// imgBloom = dst2.clone();
+			cv.addWeighted(dst2, 0.5, blurImg, 0.5, 0.0, imgBloom);
 
 			let imgBloomHist = calcHist(imgBloom);
-
 
 			cv.imshow('imgOut1', dst2);
 			cv.imshow('imgHist1', dstHist1);
@@ -344,7 +345,7 @@
 			cv.imshow('imgOut3', imgEqualHist);
 			cv.imshow('imgHist3', imgEqualHistHist);
 
-			cv.imshow('imgOut2Mask', bloomImg);
+			cv.imshow('imgOut2Mask', blurImg);
 			cv.imshow('imgOut2', imgBloom);
 			cv.imshow('imgHist2', imgBloomHist);
 
@@ -359,6 +360,7 @@
 			imgBloom.delete();
 			imgBloomHist.delete();
 			bloomImg.delete();
+			blurImg.delete();
 
 
 		};
