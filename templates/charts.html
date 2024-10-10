@@ -115,11 +115,13 @@
 		contrast.addEventListener('input', (event) => {
 			contrastValue.textContent = event.target.value;
 			alpha = event.target.value
+			performImgProc();
 		});
 
 		imgBrightness.addEventListener('input', (event) => {
 			brightnessValue.textContent = event.target.value;
 			beta = event.target.value
+			performImgProc();
 		});
 
 		// inputElement.addEventListener('change', (e) => {
@@ -127,26 +129,40 @@
 		// }, false);
 
 		// imgElement.onload = async function () {
-		button.addEventListener("click", async function () {
-			await onOpenCvReady()
+		// button.addEventListener("click", async function () {
+		button.addEventListener("click", function () {
+			performImgProc();
 
-			let mat = cv.imread(imgElement);
+		});
 
-			let gray_img = new cv.Mat();
-			cv.cvtColor(mat, gray_img, cv.COLOR_RGBA2GRAY, 0);
+		function contrastStretch(src) {
+			let dst = new cv.Mat();
+			let minVal = 0;
+			let maxVal = 255;
+			let minLoc, maxLoc;
 
-			
+			// // Find min and max pixel values
+			// cv.minMaxLoc(src, (min, max) => {
+			// 	minVal = min;
+			// 	maxVal = max;
+			// });
+
+			// [minVal, maxVal, minLoc, maxLoc] = cv.minMaxLoc(src);
+			result = cv.minMaxLoc(src);
+
+			minVal = result.minVal;
+			maxVal = result.maxVal;
 
 
-			// Adjust brightness and contrast
-			// let alpha = 2.5; // Contrast control (1.0 for no change)
-			// let beta = 50; // Brightness control (0 for no change)
+			// Apply contrast stretching formula
+			cv.convertScaleAbs(src, dst, 255 / (maxVal - minVal), -minVal * 255 / (maxVal - minVal));
 
-			let dst2 = new cv.Mat();
-			cv.addWeighted(gray_img, parseFloat(alpha), gray_img, 0, parseFloat(beta), dst2);
+			return dst;
+		}
 
+		function calcHist(inImg) {
 			let srcVec = new cv.MatVector();
-			srcVec.push_back(dst2);
+			srcVec.push_back(inImg);
 			let accumulate = false;
 			let channels = [0];
 			let histSize = [256];
@@ -159,22 +175,79 @@
 			cv.calcHist(srcVec, channels, mask, hist, histSize, ranges, accumulate);
 			let result = cv.minMaxLoc(hist, mask);
 			let max = result.maxVal;
-			let dst = new cv.Mat.zeros(mat.rows, histSize[0] * scale,
+			let dst = new cv.Mat.zeros(inImg.rows, histSize[0] * scale,
 				cv.CV_8UC3);
 			// draw histogram
 			for (let i = 0; i < histSize[0]; i++) {
-				let binVal = hist.data32F[i] * mat.rows / max;
-				let point1 = new cv.Point(i * scale, mat.rows - 1);
-				let point2 = new cv.Point((i + 1) * scale - 1, mat.rows - binVal);
+				let binVal = hist.data32F[i] * inImg.rows / max;
+				let point1 = new cv.Point(i * scale, inImg.rows - 1);
+				let point2 = new cv.Point((i + 1) * scale - 1, inImg.rows - binVal);
 				cv.rectangle(dst, point1, point2, color, cv.FILLED);
 			}
 
-			cv.imshow('imageCanvas', dst2);
 			cv.imshow('imgHist', dst);
-			mat.delete();
 			dst.delete(); srcVec.delete(); mask.delete(); hist.delete();
+		}
 
-		});
+		function performImgProc() {
+			// await onOpenCvReady()
+
+			let mat = cv.imread(imgElement);
+
+			let gray_img = new cv.Mat();
+			cv.cvtColor(mat, gray_img, cv.COLOR_RGBA2GRAY, 0);
+
+			// create low contrast image
+			let lowContrastImg = new cv.Mat();
+			cv.addWeighted(gray_img, 0.1, gray_img, 0, 0, lowContrastImg);
+
+			let newImg = new cv.Mat();
+			// newImg = contrastStretch(lowContrastImg);
+
+			cv.equalizeHist(lowContrastImg, newImg);
+			calcHist(newImg);
+
+
+
+			// Adjust brightness and contrast
+			// let alpha = 2.5; // Contrast control (1.0 for no change)
+			// let beta = 50; // Brightness control (0 for no change)
+
+			let dst2 = new cv.Mat();
+			cv.addWeighted(gray_img, parseFloat(alpha), gray_img, 0, parseFloat(beta), dst2);
+
+			// let srcVec = new cv.MatVector();
+			// srcVec.push_back(dst2);
+			// let accumulate = false;
+			// let channels = [0];
+			// let histSize = [256];
+			// let ranges = [0, 255];
+			// let hist = new cv.Mat();
+			// let mask = new cv.Mat();
+			// let color = new cv.Scalar(255, 255, 255);
+			// let scale = 2;
+			// // You can try more different parameters
+			// cv.calcHist(srcVec, channels, mask, hist, histSize, ranges, accumulate);
+			// let result = cv.minMaxLoc(hist, mask);
+			// let max = result.maxVal;
+			// let dst = new cv.Mat.zeros(mat.rows, histSize[0] * scale,
+			// 	cv.CV_8UC3);
+			// // draw histogram
+			// for (let i = 0; i < histSize[0]; i++) {
+			// 	let binVal = hist.data32F[i] * mat.rows / max;
+			// 	let point1 = new cv.Point(i * scale, mat.rows - 1);
+			// 	let point2 = new cv.Point((i + 1) * scale - 1, mat.rows - binVal);
+			// 	cv.rectangle(dst, point1, point2, color, cv.FILLED);
+			// }
+
+			cv.imshow('imageCanvas', newImg);
+			// cv.imshow('imgHist', dst);
+			mat.delete();
+			dst2.delete();
+			newImg.delete();
+			// dst.delete(); srcVec.delete(); mask.delete(); hist.delete();
+
+		};
 		// }
 
 
@@ -187,7 +260,7 @@
 			// https://emscripten.org/docs/api_reference/module.html#Module.onRuntimeInitialized
 			onRuntimeInitialized() {
 				document.getElementById('status').innerHTML = 'OpenCV.js is ready.';
-				// onOpenCvReady();
+				onOpenCvReady();
 			}
 		};
 	</script>
