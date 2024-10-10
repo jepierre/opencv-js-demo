@@ -100,6 +100,16 @@
 						<div class="col-sm">
 							<div class="card">
 								<div class="card-header">
+									Image Mask
+								</div>
+								<div class="card-block text-center">
+									<canvas id="imgOut2Mask"></canvas>
+								</div>
+							</div>
+						</div>
+						<div class="col-sm">
+							<div class="card">
+								<div class="card-header">
 									Grayscale Image
 								</div>
 								<div class="card-block text-center">
@@ -282,7 +292,7 @@
 			let imgEqualHistHist = calcHist(imgEqualHist);
 
 			// let overlay the image with gaussian blur
-			let imgBloom = dst2.clone();
+			let imgBloom = new cv.Mat();
 			let bloomImg = new cv.Mat(dst2.size().width, dst2.size().height, cv.CV_8UC1);
 
 			// draw a circle
@@ -293,8 +303,11 @@
 
 			cv.circle(bloomImg, center, radius, color, thickness)
 
-			let ksize = new cv.Size(5, 5); // kernel size (must be odd)
+			let ksize = new cv.Size(101, 101); // kernel size (must be odd)
 			cv.GaussianBlur(bloomImg, bloomImg, ksize, 0, 0, cv.BORDER_DEFAULT);
+
+			// combine the images
+			cv.addWeighted(dst2, 0.5, bloomImg, 0.5, 0.0, imgBloom);
 
 			let imgBloomHist = calcHist(imgBloom);
 
@@ -308,7 +321,8 @@
 			cv.imshow('imgOut3', imgEqualHist);
 			cv.imshow('imgHist3', imgEqualHistHist);
 
-			cv.imshow('imgOut2', bloomImg);
+			cv.imshow('imgOut2Mask', bloomImg);
+			cv.imshow('imgOut2', imgBloom);
 			cv.imshow('imgHist2', imgBloomHist);
 
 			mat.delete();
