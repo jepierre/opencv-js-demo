@@ -72,7 +72,7 @@
 					<div class="card-header">
 						Updated Image
 					</div>
-					<div class="card-block">
+					<div class="card-block text-center">
 						<canvas id="imageCanvas"></canvas>
 					</div>
 				</div>
@@ -86,6 +86,12 @@
 					<div class="card-block">
 						<canvas id="imgHist"></canvas>
 					</div>
+					<div class="card-footer">
+						<input type="range" id="contrast" value="1" min="0" max="5" step="0.1">
+						<p>Value: <span id="constrastValue">1</span></p>
+						<input type="range" id="brightness" value="1" min="0" max="100" step="1">
+						<p>Value: <span id="brightnessValue">1</span></p>
+					</div>
 				</div>
 
 			</div>
@@ -98,14 +104,30 @@
 		let imgElement = document.getElementById('imageSrc');
 		let inputElement = document.getElementById('fileInput');
 		const button = document.getElementById('histButton');
+		const contrast = document.getElementById('contrast');
+		const imgBrightness = document.getElementById('brightness');
+		const contrastValue = document.getElementById('constrastValue');
+		const brightnessValue = document.getElementById('brightnessValue');
+		let alpha = contrastValue.value;
+		let beta = brightnessValue.value;
 
+
+		contrast.addEventListener('input', (event) => {
+			contrastValue.textContent = event.target.value;
+			alpha = event.target.value
+		});
+
+		imgBrightness.addEventListener('input', (event) => {
+			brightnessValue.textContent = event.target.value;
+			beta = event.target.value
+		});
 
 		// inputElement.addEventListener('change', (e) => {
 		// 	imgElement.src = URL.createObjectURL(e.target.files[0]);
 		// }, false);
 
 		// imgElement.onload = async function () {
-		button.addEventListener("click", async function() {
+		button.addEventListener("click", async function () {
 			await onOpenCvReady()
 
 			let mat = cv.imread(imgElement);
@@ -113,8 +135,18 @@
 			let gray_img = new cv.Mat();
 			cv.cvtColor(mat, gray_img, cv.COLOR_RGBA2GRAY, 0);
 
+			
+
+
+			// Adjust brightness and contrast
+			// let alpha = 2.5; // Contrast control (1.0 for no change)
+			// let beta = 50; // Brightness control (0 for no change)
+
+			let dst2 = new cv.Mat();
+			cv.addWeighted(gray_img, parseFloat(alpha), gray_img, 0, parseFloat(beta), dst2);
+
 			let srcVec = new cv.MatVector();
-			srcVec.push_back(gray_img);
+			srcVec.push_back(dst2);
 			let accumulate = false;
 			let channels = [0];
 			let histSize = [256];
@@ -137,7 +169,7 @@
 				cv.rectangle(dst, point1, point2, color, cv.FILLED);
 			}
 
-			cv.imshow('imageCanvas', gray_img);
+			cv.imshow('imageCanvas', dst2);
 			cv.imshow('imgHist', dst);
 			mat.delete();
 			dst.delete(); srcVec.delete(); mask.delete(); hist.delete();
