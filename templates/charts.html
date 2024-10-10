@@ -77,6 +77,12 @@
 							<div class="card-block text-center">
 								<canvas id="imgOut1"></canvas>
 							</div>
+							<div class="card-footer">
+								<input type="range" id="contrast" value="1.0" min="0" max="5" step="0.1" />
+								<p>Contrast: <span id="contrastValue">1.0</span></p>
+								<input type="range" id="brightness" value="50" min="0" max="100" step="1" />
+								<p>Brightness: <span id="brightnessValue">50</span></p>
+							</div>
 						</div>
 					</div>
 					<div class="col-sm">
@@ -88,10 +94,7 @@
 								<canvas id="imgHist1"></canvas>
 							</div>
 							<div class="card-footer">
-								<input type="range" id="contrast" value="1.0" min="0" max="5" step="0.1">
-								<p>Value: <span id="constrastValue">1.0</span></p>
-								<input type="range" id="brightness" value="50" min="0" max="100" step="1">
-								<p>Value: <span id="brightnessValue">50</span></p>
+
 							</div>
 						</div>
 
@@ -104,6 +107,10 @@
 								</div>
 								<div class="card-block text-center">
 									<canvas id="imgOut2Mask"></canvas>
+								</div>
+								<div class="card-footer">
+									<input type="range" , id="kernelSize" value="101" min="0" , max="201" , step="1">
+									<p>Kernel Size: <span id="kernelSizeValue">101</span></p>
 								</div>
 							</div>
 						</div>
@@ -190,10 +197,14 @@
 		const button = document.getElementById('loadImg');
 		const contrast = document.getElementById('contrast');
 		const imgBrightness = document.getElementById('brightness');
-		const contrastValue = document.getElementById('constrastValue');
+		const kernelSize = document.getElementById('kernelSize');
+		const kernelSizeValue = document.getElementById('kernelSizeValue');
+		const contrastValue = document.getElementById('contrastValue');
 		const brightnessValue = document.getElementById('brightnessValue');
-		let alpha = contrastValue.value;
-		let beta = brightnessValue.value;
+
+		let alpha = parseFloat(contrastValue.innerText);
+		let beta = parseFloat(brightnessValue.innerText);
+		let ksizeVal = parseFloat(kernelSizeValue.innerText);
 
 		contrast.addEventListener('input', (event) => {
 			contrastValue.textContent = event.target.value;
@@ -206,6 +217,18 @@
 			beta = event.target.value
 			performImgProc();
 		});
+
+		kernelSize.addEventListener('input', (event) => {
+			kernelSizeValue.textContent = event.target.value;
+			ksizeVal = parseInt(event.target.value)
+
+			if (ksizeVal === 0 || !(ksizeVal % 2)) { // === equal value and equal type https://www.w3schools.com/js/js_operators.asp
+				ksizeVal += 1
+			}
+
+			performImgProc();
+		});
+
 
 		inputElement.addEventListener('change', (e) => {
 			imgElement.src = URL.createObjectURL(e.target.files[0]);
@@ -296,14 +319,14 @@
 			let bloomImg = new cv.Mat(dst2.size().width, dst2.size().height, cv.CV_8UC1);
 
 			// draw a circle
-			let center = new cv.Point(0, 1);			
+			let center = new cv.Point(0, 1);
 			let radius = 50;
 			let color = new cv.Scalar(255, 0, 0, 255); // color (B, G, R, A)
 			let thickness = -1; //line thickness, -1 is filled circle
 
 			cv.circle(bloomImg, center, radius, color, thickness)
 
-			let ksize = new cv.Size(101, 101); // kernel size (must be odd)
+			let ksize = new cv.Size(ksizeVal, ksizeVal); // kernel size (must be odd)
 			cv.GaussianBlur(bloomImg, bloomImg, ksize, 0, 0, cv.BORDER_DEFAULT);
 
 			// combine the images
