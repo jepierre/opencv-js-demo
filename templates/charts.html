@@ -111,6 +111,8 @@
 								<div class="card-footer">
 									<input type="range" , id="kernelSize" value="101" min="0" , max="201" , step="1">
 									<p>Kernel Size: <span id="kernelSizeValue">101</span></p>
+									<input type="range" , id="radius" value="50" min="0" , max="100" , step="1">
+									<p>radius: <span id="radiusValue">50</span></p>
 								</div>
 							</div>
 						</div>
@@ -198,6 +200,8 @@
 		const contrast = document.getElementById('contrast');
 		const imgBrightness = document.getElementById('brightness');
 		const kernelSize = document.getElementById('kernelSize');
+		const circleRadius = document.getElementById('radius');
+		const radiusValue = document.getElementById('radiusValue');
 		const kernelSizeValue = document.getElementById('kernelSizeValue');
 		const contrastValue = document.getElementById('contrastValue');
 		const brightnessValue = document.getElementById('brightnessValue');
@@ -205,6 +209,7 @@
 		let alpha = parseFloat(contrast.value);
 		let beta = parseFloat(imgBrightness.value);
 		let ksizeVal = parseFloat(kernelSize.value);
+		let circleRadiusVal = parseInt(circleRadius.value);
 
 		contrast.addEventListener('input', (event) => {
 			contrastValue.textContent = event.target.value;
@@ -229,6 +234,11 @@
 			performImgProc();
 		});
 
+		circleRadius.addEventListener('input', (event) => {
+			radiusValue.textContent = event.target.value;
+			circleRadiusVal = parseInt(event.target.value)
+			performImgProc();
+		});
 
 		inputElement.addEventListener('change', (e) => {
 			imgElement.src = URL.createObjectURL(e.target.files[0]);
@@ -238,6 +248,11 @@
 			performImgProc();
 
 		});
+
+		imgElement.onload = async function () {
+			await onOpenCvReady();
+			performImgProc();
+		}
 
 		function contrastStretch(src) {
 			let dst = new cv.Mat();
@@ -317,7 +332,8 @@
 			let imgEqualHistHist = calcHist(imgEqualHist);
 
 			// let overlay the image with gaussian blur
-			let bloomImg = new cv.Mat(dst2.size().width, dst2.size().height, cv.CV_8UC1);
+			// let bloomImg = cv.Mat.zeros(dst2.size().width, dst2.size().height, cv.CV_8UC1);
+			let bloomImg = cv.Mat.zeros(dst2.rows, dst2.cols, cv.CV_8UC1);
 
 			// draw a circle
 			let center = new cv.Point(0, 0);
@@ -325,10 +341,10 @@
 			let color = new cv.Scalar(255, 0, 0, 255); // color (B, G, R, A)
 			let thickness = -1; //line thickness, -1 is filled circle
 
-			cv.circle(bloomImg, center, radius, color, cv.FILLED)
+			cv.circle(bloomImg, center, circleRadiusVal, color, cv.FILLED)
 
 			let ksize = new cv.Size(ksizeVal, ksizeVal); // kernel size (must be odd)
-			cv.GaussianBlur(bloomImg, blurImg, ksize, 0, 0, cv.BORDER_REPLICATE);
+			cv.GaussianBlur(bloomImg, blurImg, ksize, 0, 0, cv.BORDER_DEFAULT);
 
 			// combine the images
 			// imgBloom = dst2.clone();
@@ -361,15 +377,10 @@
 			imgBloomHist.delete();
 			bloomImg.delete();
 			blurImg.delete();
-
-
 		};
-		// }
-
 
 		function onOpenCvReady() {
 			document.body.classList.remove("loading");
-			// main()
 		}
 
 		var Module = {
