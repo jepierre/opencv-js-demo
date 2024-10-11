@@ -38,7 +38,7 @@
 						Original Image
 					</div>
 					<div class="card-block text-center">
-						<img id="imageSrc" src="static\lena.png" alt="No Image" class="img-thumbnail" />
+						<img id="imageSrc" src=".\static\lena.png" alt="No Image" class="img-thumbnail" />
 					</div>
 					<div class="card-footer text-muted">
 						<button class="btn btn-outline-primary" id="loadImg">Load Image</button>
@@ -229,7 +229,6 @@
 		});
 
 		imgElement.onload = async function () {
-			await onOpenCvReady();
 			performImgProc();
 		}
 
@@ -247,6 +246,12 @@
 		let x_data = linspace(0, 255, 256);
 
 		// create a data source to hold data
+		const hist0Source = new Bokeh.ColumnDataSource({
+			data: { x: x_data, y: x_data }
+		});
+
+
+		// create a data source to hold data
 		const hist1Source = new Bokeh.ColumnDataSource({
 			data: { x: x_data, y: x_data }
 		});
@@ -256,7 +261,17 @@
 			title: 'Histogram 1',
 			tools: "pan,wheel_zoom,box_zoom,reset,save",
 			height: 300,
-			width: 300
+			width: 300, 
+			background_fill_color: "#F2F2F7"
+		});
+
+
+		hist1Plot.vbar({
+			x: { field: "x" },
+			top: { field: "y" },
+			width: 0.8,
+			fill_color: "#000000",
+			source: hist0Source
 		});
 
 
@@ -475,6 +490,8 @@
 
 			let imgBloomHist = calcHist(imgBloom);
 
+			simpleHist(gray_img, '#imgHist1ID', hist0Source)
+
 			cv.imshow('imgOut1', dst2);
 			simpleHist(dst2, '#imgHist1ID', hist1Source)
 			// cv.imshow('imgHist1', dstHist1);
@@ -506,12 +523,10 @@
 			blurImg.delete();
 		};
 
-
 		var Module = {
 			// https://emscripten.org/docs/api_reference/module.html#Module.onRuntimeInitialized
 			onRuntimeInitialized() {
 				document.getElementById('status').innerHTML = 'OpenCV.js is ready.';
-				onOpenCvReady();
 			}
 		};
 	</script>
