@@ -138,8 +138,8 @@
 								<div class="card-header">
 									Histogram
 								</div>
-								<div class="card-block">
-									<canvas id="imgHist2"></canvas>
+								<div class="card-block" id="imgHist2ID">
+									<!-- <canvas id="imgHist2"></canvas> -->
 								</div>
 								<div class="card-footer">
 								</div>
@@ -162,8 +162,8 @@
 								<div class="card-header">
 									Histogram
 								</div>
-								<div class="card-block">
-									<canvas id="imgHist3"></canvas>
+								<div class="card-block" id="imgHist3ID">
+									<!-- <canvas id="imgHist3"></canvas> -->
 								</div>
 								<div class="card-footer">
 								</div>
@@ -186,8 +186,8 @@
 								<div class="card-header">
 									Histogram
 								</div>
-								<div class="card-block">
-									<canvas id="imgHist4"></canvas>
+								<div class="card-block" id="imgHist4ID">
+									<!-- <canvas id="imgHist4"></canvas> -->
 								</div>
 								<div class="card-footer">
 								</div>
@@ -296,11 +296,76 @@
 			fill_color: "blue", source: hist1Source
 		});
 
-		// hist1Plot.add_glyph(, hist1Source);
 		Bokeh.Plotting.show(hist1Plot, '#imgHist1ID');
 
-		// document.getElementById("imgHist1ID").append(hist1Plot.el)
-		// document.body.appendChild(plot.el);
+		// create a data source to hold data
+		const hist2Source = new Bokeh.ColumnDataSource({
+			data: { x: x_data, y: x_data }
+		});
+
+		// make a plot with some tools
+		const hist2Plot = Bokeh.Plotting.figure({
+			title: 'Histogram 2',
+			tools: "pan,wheel_zoom,box_zoom,reset,save",
+			height: 300,
+			width: 300
+		});
+
+
+		hist2Plot.vbar({
+			x: { field: "x" },
+			top: { field: "y" },
+			width: 0.8,
+			fill_color: "blue", source: hist2Source
+		});
+
+		Bokeh.Plotting.show(hist2Plot, '#imgHist2ID');
+
+		// create a data source to hold data
+		const hist3Source = new Bokeh.ColumnDataSource({
+			data: { x: x_data, y: x_data }
+		});
+
+		// make a plot with some tools
+		const hist3Plot = Bokeh.Plotting.figure({
+			title: 'Histogram 3',
+			tools: "pan,wheel_zoom,box_zoom,reset,save",
+			height: 300,
+			width: 300
+		});
+
+
+		hist3Plot.vbar({
+			x: { field: "x" },
+			top: { field: "y" },
+			width: 0.8,
+			fill_color: "blue", source: hist3Source
+		});
+
+		Bokeh.Plotting.show(hist3Plot, '#imgHist3ID');
+
+		// create a data source to hold data
+		const hist4Source = new Bokeh.ColumnDataSource({
+			data: { x: x_data, y: x_data }
+		});
+
+		// make a plot with some tools
+		const hist4Plot = Bokeh.Plotting.figure({
+			title: 'Histogram 4',
+			tools: "pan,wheel_zoom,box_zoom,reset,save",
+			height: 300,
+			width: 300
+		});
+
+
+		hist4Plot.vbar({
+			x: { field: "x" },
+			top: { field: "y" },
+			width: 0.8,
+			fill_color: "blue", source: hist4Source
+		});
+
+		Bokeh.Plotting.show(hist4Plot, '#imgHist4ID');
 
 		function contrastStretch(src) {
 			let dst = new cv.Mat();
@@ -320,7 +385,7 @@
 			return dst;
 		}
 
-		function simpleHist(inImg, id) {
+		function simpleHist(inImg, id, dataSource) {
 			let srcVec = new cv.MatVector();
 			srcVec.push_back(inImg);
 			let accumulate = false;
@@ -349,10 +414,10 @@
 				x_data.push(i);
 				y_data.push(binVal);
 			}
-			hist1Source.data.x = x_data
-			hist1Source.data.y = y_data
+			dataSource.data.x = x_data
+			dataSource.data.y = y_data
 
-			hist1Source.change.emit();
+			dataSource.change.emit();
 
 			mask.delete();
 			srcVec.delete();
@@ -440,18 +505,21 @@
 			let imgBloomHist = calcHist(imgBloom);
 
 			cv.imshow('imgOut1', dst2);
-			simpleHist(imgBloom, '#imgHist1ID')
+			simpleHist(dst2, '#imgHist1ID', hist1Source)
 			// cv.imshow('imgHist1', dstHist1);
 
 			cv.imshow('imgOut4', imgContrastStretch);
-			cv.imshow('imgHist4', imgContrastStretchHist);
+			simpleHist(imgContrastStretch, '#imgHist4ID', hist4Source)
+			// cv.imshow('imgHist4', imgContrastStretchHist);
 
 			cv.imshow('imgOut3', imgEqualHist);
-			cv.imshow('imgHist3', imgEqualHistHist);
+			simpleHist(imgEqualHist, '#imgHist3ID', hist3Source)
+			// cv.imshow('imgHist3', imgEqualHistHist);
 
 			cv.imshow('imgOut2Mask', blurImg);
 			cv.imshow('imgOut2', imgBloom);
-			cv.imshow('imgHist2', imgBloomHist);
+			simpleHist(imgBloom, '#imgHist2ID', hist2Source)
+			// cv.imshow('imgHist2', imgBloomHist);
 
 			mat.delete();
 			gray_img.delete();
