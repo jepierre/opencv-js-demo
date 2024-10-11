@@ -29,7 +29,7 @@ def homepage():
 # Main Driver Function
 if __name__ == "__main__":
     # Run the application on the local development server
-    app.run(debug=True)
+    # app.run(debug=True)
     # to export to file use: python .\flask_blog.py > temp.html
-    # with app.app_context():
-        # print(homepage())
+    with app.app_context():
+        print(homepage())

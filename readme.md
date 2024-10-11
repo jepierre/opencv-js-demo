@@ -16,3 +16,9 @@ https://stackoverflow.com/questions/69871650/adding-bloom-effect-to-an-image-usi
 
 image operations:
 https://docs.opencv.org/4.x/d3/dc1/tutorial_basic_linear_transform.html
+
+
+to create html: 
+python ./flask_main.py > index.html
+
+if you get errors loading html, be sure it's save as utf-8 instead of utf-16L
