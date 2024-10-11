@@ -408,7 +408,8 @@
 
 			// draw histogram
 			for (let i = 0; i < histSize[0]; i++) {
-				let binVal = hist.data32F[i] * inImg.rows / max;
+				// let binVal = hist.data32F[i] * inImg.rows / max;
+				let binVal = (hist.data32F[i] - result.minVal) / (max - result.minVal)
 				const t_data = [i, binVal];
 				bar_data.push(t_data);
 				x_data.push(i);
@@ -500,6 +501,7 @@
 
 			// combine the images
 			// imgBloom = dst2.clone();
+			// cv.addWeighted(dst2, 1, blurImg, 1, 0.0, imgBloom);
 			cv.addWeighted(dst2, 0.5, blurImg, 0.5, 0.0, imgBloom);
 
 			let imgBloomHist = calcHist(imgBloom);
