@@ -250,6 +250,11 @@
 			data: { x: x_data, y: x_data }
 		});
 
+		// create a data source to hold data
+		const cdf1Source = new Bokeh.ColumnDataSource({
+			data: { x: x_data, y: x_data }
+		});
+
 
 		// create a data source to hold data
 		const hist1Source = new Bokeh.ColumnDataSource({
@@ -265,22 +270,33 @@
 			background_fill_color: "#F2F2F7"
 		});
 
-
-		// hist1Plot.vbar({
-		// 	x: { field: "x" },
-		// 	top: { field: "y" },
-		// 	width: 0.8,
-		// 	width: 3,
-		// 	fill_color: "#b3de69",
-		// 	source: hist0Source
-		// });
+		hist1Plot.line({
+			x: { field: "x" },
+			y: { field: "y" },
+			line_color: "#f46d43", line_width: 0.8, line_alpha: 0.6,
+			source: cdf1Source
+		});
 
 
 		hist1Plot.vbar({
 			x: { field: "x" },
 			top: { field: "y" },
 			width: 0.8,
-			fill_color: "red", source: hist1Source
+			line_color: "black",
+			fill_alpha: .6,
+			fill_color: "#b3de69",
+			source: hist0Source
+		});
+
+
+		hist1Plot.vbar({
+			x: { field: "x" },
+			top: { field: "y" },
+			width: 2,
+			fill_alpha: .6,
+			// line_color: "purple",
+			fill_color: "red",
+			source: hist1Source
 		});
 
 		Bokeh.Plotting.show(hist1Plot, '#imgHist1ID');
@@ -354,6 +370,26 @@
 
 		Bokeh.Plotting.show(hist4Plot, '#imgHist4ID');
 
+		function calculateCDF(histogram) {
+			// Initialize variables
+			let cdf = [];
+			let total = 0;
+
+			// Calculate the total count of all bins
+			for (let i = 0; i < histogram.length; i++) {
+				total += histogram[i];
+			}
+
+			// Calculate the CDF for each bin
+			let cumulativeSum = 0;
+			for (let i = 0; i < histogram.length; i++) {
+				cumulativeSum += histogram[i];
+				cdf.push(cumulativeSum / total);
+			}
+
+			return cdf;
+		}
+
 		function contrastStretch(src) {
 			let dst = new cv.Mat();
 			let minVal = 0;
@@ -392,6 +428,7 @@
 			const bar_data = [];
 			const x_data = [];
 			const y_data = [];
+			const cdf_data = calculateCDF(hist.data32F);
 
 			// draw histogram
 			for (let i = 0; i < histSize[0]; i++) {
@@ -405,6 +442,8 @@
 			dataSource.data.x = x_data
 			dataSource.data.y = y_data
 
+			cdf1Source.data.y = cdf_data;
+			cdf1Source.change.emit();
 			dataSource.change.emit();
 
 			mask.delete();
