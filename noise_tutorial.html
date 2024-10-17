@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>OpenCV Tutorials using JavaScript</title>
+
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
+		integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
+		crossorigin="anonymous"></script>
+	<script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-3.6.0.min.js"></script>
+	<script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-gl-3.6.0.min.js"></script>
+	<script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-3.6.0.min.js"></script>
+	<script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-3.6.0.min.js"></script>
+	<script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-mathjax-3.6.0.min.js"></script>
+	<script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-api-3.6.0.min.js"></script>
+	<script async src="https://docs.opencv.org/4.x/opencv.js" type="text/javascript" charset="utf-8"></script>
+</head>
+
+<body>
+	<div class="container">
+		<div class="jumbotron text-center">
+			<h1> OpenCV - Load an image</h1>
+			<p> This is an example for loading an image</p>
+		</div>
+
+		<div class="row text-center p-2">
+			<p id="status">OpenCV.js is loading...</p>
+			<input type="file" id="fileInput" name="file" class="form-control" />
+		</div>
+
+		<div class="row p-2">
+			<div class="col-sm-3">
+				<div class="card">
+					<div class="card-header">
+						Original Image
+					</div>
+					<div class="card-block text-center">
+						<img id="imageSrc" src=".\static\lena.png" alt="No Image" class="img-thumbnail" />
+						<!-- <img id="imageSrc" alt="No Image" class="img-thumbnail" /> -->
+					</div>
+				</div>
+			</div>
+
+			<div class="col-sm">
+				<div class="row p-1">
+					<div class="col-sm">
+						<div class="card">
+							<div class="card-header">
+								Grayscale Image
+							</div>
+							<div class="card-block text-center">
+								<canvas id="imgOut1"></canvas>
+							</div>
+							<div class="card-footer">
+								<input type="range" id="contrast" value="1.0" min="0" max="5" step="0.1" />
+								<p>Contrast: <span id="contrastValue">1.0</span></p>
+								<input type="range" id="brightness" value="0" min="0" max="100" step="1" />
+								<p>Brightness: <span id="brightnessValue">0</span></p>
+							</div>
+						</div>
+					</div>
+					<div class="col-sm">
+						<div class="card">
+							<div class="card-header">
+								Histogram
+							</div>
+							<div class="card-block text-center" id="imgHist1ID">
+							</div>
+							<div class="card-footer">
+
+							</div>
+						</div>
+
+					</div>
+					<div class="row p-1">
+						<div class="col-sm">
+							<div class="card">
+								<div class="card-header">
+									Noise mask
+								</div>
+								<div class="card-block text-center">
+									<canvas id="imgOut2Mask"></canvas>
+								</div>
+								<div class="card-footer">
+									<input type="range" , id="noiseValue" value="0" min="0" , max="255" , step="1">
+									<p>Noise Value: <span id="noiseDisplayValue">0</span></p>
+								</div>
+							</div>
+						</div>
+						<div class="col-sm">
+							<div class="card">
+								<div class="card-header">
+									Grayscale Image
+								</div>
+								<div class="card-block text-center">
+									<canvas id="imgOut2"></canvas>
+								</div>
+							</div>
+						</div>
+						<div class="col-sm">
+							<div class="card">
+								<div class="card-header">
+									Histogram
+								</div>
+								<div class="card-block" id="imgHist2ID">
+								</div>
+								<div class="card-footer">
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row p-1">
+						<div class="col-sm">
+							<div class="card">
+								<div class="card-header">
+									Noise mask
+								</div>
+								<div class="card-block text-center">
+									<canvas id="imgOut3Mask"></canvas>
+								</div>
+								<div class="card-footer">
+									<input type="range" , id="meanValue" value="0" min="0" , max="255" , step="1">
+									<p>Mean Value: <span id="meanDisplayValue">0</span></p>
+									<input type="range" , id="stdevValue" value="0" min="0" , max="255" , step="1">
+									<p>StdDev Value: <span id="stdevDisplayValue">0</span></p>
+								</div>
+							</div>
+						</div>
+						<div class="col-sm">
+							<div class="card">
+								<div class="card-header">
+									Grayscale Image
+								</div>
+								<div class="card-block text-center">
+									<canvas id="imgOut3"></canvas>
+								</div>
+							</div>
+						</div>
+						<div class="col-sm">
+							<div class="card">
+								<div class="card-header">
+									Histogram
+								</div>
+								<div class="card-block" id="imgHist3ID">
+								</div>
+								<div class="card-footer">
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+
+		let imgElement = document.getElementById('imageSrc');
+		let inputElement = document.getElementById('fileInput');
+		// const button = document.getElementById('loadImg');
+		const contrast = document.getElementById('contrast');
+		const imgBrightness = document.getElementById('brightness');
+		const noiseValue = document.getElementById('noiseValue');
+		const noiseDisplayValue = document.getElementById('noiseDisplayValue');
+		const meanValue = document.getElementById('meanValue');
+		const meanDisplayValue = document.getElementById('meanDisplayValue');
+		const stdevValue = document.getElementById('stdevValue');
+		const stdevDisplayValue = document.getElementById('stdevDisplayValue');
+		const contrastValue = document.getElementById('contrastValue');
+		const brightnessValue = document.getElementById('brightnessValue');
+
+		let alpha = parseFloat(contrast.value);
+		let beta = parseFloat(imgBrightness.value);
+		let nVal = parseFloat(noiseValue.value);
+		let mVal = parseFloat(meanValue.value);
+		let stdVal = parseFloat(stdevValue.value);
+		let isNotReady = true;
+
+		contrast.addEventListener('input', (event) => {
+			contrastValue.textContent = event.target.value;
+			alpha = event.target.value
+			performImgProc();
+		});
+
+		imgBrightness.addEventListener('input', (event) => {
+			brightnessValue.textContent = event.target.value;
+			beta = event.target.value
+			performImgProc();
+		});
+
+		noiseValue.addEventListener('input', (event) => {
+			noiseDisplayValue.textContent = event.target.value;
+			nVal = parseInt(event.target.value)
+			performImgProc();
+		});
+
+		meanValue.addEventListener('input', (event) => {
+			meanDisplayValue.textContent = event.target.value;
+			mVal = parseFloat(event.target.value)
+			performImgProc();
+		});
+
+		stdevValue.addEventListener('input', (event) => {
+			stdevDisplayValue.textContent = event.target.value;
+			stdVal = parseFloat(event.target.value)
+			performImgProc();
+		});
+
+		inputElement.addEventListener('change', (e) => {
+			imgElement.src = URL.createObjectURL(e.target.files[0]);
+			imgElement.setAttribute('crossOrigin', '')
+		}, false);
+
+		imgElement.onload = function () {
+			performImgProc();
+		}
+
+		function linspace(start, stop, num, endpoint = true) {
+			const step = (stop - start) / (endpoint ? num - 1 : num);
+			const result = [];
+
+			for (let i = 0; i < num; i++) {
+				result.push(start + step * i);
+			}
+
+			return result;
+		}
+
+		let x_data = linspace(0, 255, 256);
+
+		// create a data source to hold data
+		const hist0Source = new Bokeh.ColumnDataSource({
+			data: { x: x_data, y: x_data }
+		});
+
+		// create a data source to hold data
+		const cdf0Source = new Bokeh.ColumnDataSource({
+			data: { x: x_data, y: x_data }
+		});
+
+		// create a data source to hold data
+		const cdf1Source = new Bokeh.ColumnDataSource({
+			data: { x: x_data, y: x_data }
+		});
+
+		// create a data source to hold data
+		const hist1Source = new Bokeh.ColumnDataSource({
+			data: { x: x_data, y: x_data }
+		});
+
+		// make a plot with some tools
+		const hist1Plot = Bokeh.Plotting.figure({
+			title: 'Histogram 1',
+			tools: "pan,wheel_zoom,box_zoom,reset,save",
+			height: 300,
+			width: 300,
+			background_fill_color: "#F2F2F7"
+		});
+
+		hist1Plot.line({
+			x: { field: "x" },
+			y: { field: "y" },
+			line_color: "#f46d43", line_width: 0.8, line_alpha: 0.6,
+			source: cdf0Source
+		});
+
+		hist1Plot.line({
+			x: { field: "x" },
+			y: { field: "y" },
+			line_color: "#f46d43", line_width: 0.8, line_alpha: 0.6,
+			source: cdf1Source
+		});
+
+		hist1Plot.vbar({
+			x: { field: "x" },
+			top: { field: "y" },
+			width: 0.8,
+			line_color: "black",
+			fill_alpha: .6,
+			fill_color: "#b3de69",
+			source: hist0Source
+		});
+
+
+		hist1Plot.vbar({
+			x: { field: "x" },
+			top: { field: "y" },
+			width: 2,
+			fill_alpha: .6,
+			fill_color: "red",
+			source: hist1Source
+		});
+
+		Bokeh.Plotting.show(hist1Plot, '#imgHist1ID');
+
+		// create a data source to hold data
+		const cdf2Source = new Bokeh.ColumnDataSource({
+			data: { x: x_data, y: x_data }
+		});
+
+		// create a data source to hold data
+		const hist2Source = new Bokeh.ColumnDataSource({
+			data: { x: x_data, y: x_data }
+		});
+
+		// make a plot with some tools
+		const hist2Plot = Bokeh.Plotting.figure({
+			title: 'Histogram 2',
+			tools: "pan,wheel_zoom,box_zoom,reset,save",
+			height: 300,
+			width: 300
+		});
+
+		hist2Plot.line({
+			x: { field: "x" },
+			y: { field: "y" },
+			line_color: "#f46d43", line_width: 0.8, line_alpha: 0.6,
+			source: cdf2Source
+		});
+
+		hist2Plot.vbar({
+			x: { field: "x" },
+			top: { field: "y" },
+			width: 0.8,
+			fill_color: "blue", source: hist2Source
+		});
+
+		Bokeh.Plotting.show(hist2Plot, '#imgHist2ID');
+
+		// create a data source to hold data
+		const cdf3Source = new Bokeh.ColumnDataSource({
+			data: { x: x_data, y: x_data }
+		});
+
+		const hist3Source = new Bokeh.ColumnDataSource({
+			data: { x: x_data, y: x_data }
+		});
+
+		// make a plot with some tools
+		const hist3Plot = Bokeh.Plotting.figure({
+			title: 'Histogram 3',
+			tools: "pan,wheel_zoom,box_zoom,reset,save",
+			height: 300,
+			width: 300
+		});
+
+		hist3Plot.line({
+			x: { field: "x" },
+			y: { field: "y" },
+			line_color: "#f46d43", line_width: 0.8, line_alpha: 0.6,
+			source: cdf3Source
+		});
+
+		hist3Plot.vbar({
+			x: { field: "x" },
+			top: { field: "y" },
+			width: 0.8,
+			fill_color: "blue", source: hist3Source
+		});
+
+		Bokeh.Plotting.show(hist3Plot, '#imgHist3ID');
+
+		function calculateCDF(histogram) {
+			// Initialize variables
+			let cdf = [];
+			let total = 0;
+
+			// Calculate the total count of all bins
+			for (let i = 0; i < histogram.length; i++) {
+				total += histogram[i];
+			}
+
+			// Calculate the CDF for each bin
+			let cumulativeSum = 0;
+			for (let i = 0; i < histogram.length; i++) {
+				cumulativeSum += histogram[i];
+				cdf.push(cumulativeSum / total);
+			}
+
+			return cdf;
+		}
+
+		function contrastStretch(src) {
+			let dst = new cv.Mat();
+			let minVal = 0;
+			let maxVal = 255;
+			let minLoc, maxLoc;
+
+			// Find min and max pixel values
+			result = cv.minMaxLoc(src);
+
+			minVal = result.minVal;
+			maxVal = result.maxVal;
+
+			// Apply contrast stretching formula
+			cv.convertScaleAbs(src, dst, 255 / (maxVal - minVal), -minVal * 255 / (maxVal - minVal));
+
+			return dst;
+		}
+
+		function cvRandArr(mat, low, high) {
+			for (let i = 0; i < mat.rows; i++) {
+				for (let j = 0; j < mat.cols; j++) {
+					for (let c = 0; c < mat.channels(); c++) {
+						mat.data[i * mat.cols * mat.channels() + j * mat.channels() + c] =
+							Math.random() * (high - low) + low;
+					}
+				}
+			}
+		}
+
+		//https://stackoverflow.com/questions/25582882/javascript-math-random-normal-distribution-gaussian-bell-curve
+		//https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform
+		function gaussianRandom(mean = 0, stdev = 1) {
+			const u = 1 - Math.random(); // Converting [0, 1) to (0, 1]
+			const v = Math.random();
+			const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+			return z * stdev + mean
+		}
+		function cvRandNormal(mat, mean = 0, stdev = 1) {
+			for (let i = 0; i < mat.rows; i++) {
+				for (let j = 0; j < mat.cols; j++) {
+					for (let c = 0; c < mat.channels(); c++) {
+						mat.data[i * mat.cols * mat.channels() + j * mat.channels() + c] =
+							gaussianRandom(mean, stdev);
+					}
+				}
+			}
+		}
+
+
+		function simpleHist(inImg, id, dataSource, cdfDataSource) {
+			let srcVec = new cv.MatVector();
+			srcVec.push_back(inImg);
+			let accumulate = false;
+			let channels = [0];
+			let histSize = [256];
+			let ranges = [0, 255];
+			let hist = new cv.Mat();
+			let mask = new cv.Mat();
+			let color = new cv.Scalar(255, 255, 255);
+			let scale = 2;
+
+			// You can try more different parameters
+			cv.calcHist(srcVec, channels, mask, hist, histSize, ranges, accumulate);
+			let result = cv.minMaxLoc(hist, mask);
+			let max = result.maxVal;
+
+			const bar_data = [];
+			const x_data = [];
+			const y_data = [];
+			const cdf_data = calculateCDF(hist.data32F);
+
+			// draw histogram
+			for (let i = 0; i < histSize[0]; i++) {
+				// let binVal = hist.data32F[i] * inImg.rows / max;
+				let binVal = (hist.data32F[i] - result.minVal) / (max - result.minVal)
+				const t_data = [i, binVal];
+				bar_data.push(t_data);
+				x_data.push(i);
+				y_data.push(binVal);
+			}
+			dataSource.data.x = x_data
+			dataSource.data.y = y_data
+
+			cdfDataSource.data.y = cdf_data;
+			cdfDataSource.change.emit();
+			dataSource.change.emit();
+
+			mask.delete();
+			srcVec.delete();
+			hist.delete();
+		}
+
+		function calcHist(inImg) {
+			let srcVec = new cv.MatVector();
+			srcVec.push_back(inImg);
+			let accumulate = false;
+			let channels = [0];
+			let histSize = [256];
+			let ranges = [0, 255];
+			let hist = new cv.Mat();
+			let mask = new cv.Mat();
+			let color = new cv.Scalar(255, 255, 255);
+			let scale = 2;
+
+			// You can try more different parameters
+			cv.calcHist(srcVec, channels, mask, hist, histSize, ranges, accumulate);
+			let result = cv.minMaxLoc(hist, mask);
+			let max = result.maxVal;
+			let dst = new cv.Mat.zeros(inImg.rows, histSize[0] * scale,
+				cv.CV_8UC3);
+
+			// draw histogram
+			for (let i = 0; i < histSize[0]; i++) {
+				let binVal = hist.data32F[i] * inImg.rows / max;
+				let point1 = new cv.Point(i * scale, inImg.rows - 1);
+				let point2 = new cv.Point((i + 1) * scale - 1, inImg.rows - binVal);
+				cv.rectangle(dst, point1, point2, color, cv.FILLED);
+			}
+
+			srcVec.delete(); mask.delete(); hist.delete();
+			return dst;
+		}
+
+		function performImgProc() {
+			// if (isNotReady) {
+			// return 0;
+			// }
+
+			let mat = cv.imread(imgElement);
+			let gray_img = new cv.Mat();
+			let dst2 = new cv.Mat();
+			let imgBloom = new cv.Mat();
+			let imgNormNoise = new cv.Mat();
+
+			cv.cvtColor(mat, gray_img, cv.COLOR_RGBA2GRAY, 0);
+
+			//set alpha and bias to control contrast and brightness
+			//https://docs.opencv.org/4.x/d5/dc4/tutorial_adding_images.html
+			cv.addWeighted(gray_img, parseFloat(alpha), gray_img, 0, parseFloat(beta), dst2);
+
+			// create low contrast image
+			// cv.addWeighted(gray_img, 0.1, gray_img, 0, 0, dst2);
+			let dstHist1 = calcHist(dst2);
+
+			// let overlay the image with gaussian blur
+			let blurImg = cv.Mat.zeros(dst2.rows, dst2.cols, cv.CV_8UC1);
+
+			// add uniform noise noise
+			cvRandArr(blurImg, 0, nVal);
+
+			// blend the images together
+			//https://docs.opencv.org/4.x/d5/dc4/tutorial_adding_images.html
+			cv.addWeighted(dst2, 0.5, blurImg, 0.5, 0.0, imgBloom);
+
+			// add normal noise
+			let imgNormNoiseMask = cv.Mat.zeros(dst2.rows, dst2.cols, cv.CV_8UC1);
+			cvRandNormal(imgNormNoiseMask, mean = mVal, stdev = stdVal)
+
+			cv.addWeighted(dst2, 0.5, imgNormNoiseMask, 0.5, 0.0, imgNormNoise);
+			let imgBloomHist = calcHist(imgBloom);
+
+			simpleHist(gray_img, '#imgHist1ID', hist0Source, cdf0Source)
+
+			cv.imshow('imgOut1', dst2);
+			simpleHist(dst2, '#imgHist1ID', hist1Source, cdf1Source)
+
+			cv.imshow('imgOut2Mask', blurImg);
+			cv.imshow('imgOut2', imgBloom);
+			simpleHist(imgBloom, '#imgHist2ID', hist2Source, cdf2Source)
+
+			cv.imshow('imgOut3Mask', imgNormNoiseMask);
+			cv.imshow('imgOut3', imgNormNoise);
+			simpleHist(imgNormNoise, '#imgHist3ID', hist3Source, cdf3Source)
+
+			mat.delete();
+			gray_img.delete();
+			dst2.delete();
+			dstHist1.delete();
+			imgBloom.delete();
+			imgBloomHist.delete();
+			blurImg.delete();
+			imgNormNoise.delete();
+			imgNormNoiseMask.delete();
+		};
+
+		var Module = {
+			// https://emscripten.org/docs/api_reference/module.html#Module.onRuntimeInitialized
+			onRuntimeInitialized() {
+				document.getElementById('status').innerHTML = 'OpenCV.js is ready.';
+				isNotReady = false;
+			}
+		};
+
+	</script>
+
+
+</body>
+
+</html>
